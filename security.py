@@ -14,5 +14,5 @@ def authenticate(username, password):
         return user
 
 def identity(payload): # payload - contents of the JWT token
-user_id = payload['identity']
-return userid_mapping.get(user_id, None)
+    user_id = payload['identity']
+    return userid_mapping.get(user_id, None)
