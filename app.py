@@ -1,5 +1,5 @@
 from flask import Flask, request
-from flask_restful import Resource, Api
+from flask_restful import Resource, Api, reqparse
 from flask_jwt import JWT, jwt_required
 
 from security import authenticate, identity
@@ -19,6 +19,7 @@ class Item(Resource):
         """
             A user has to be authenticated to send a GET request
         """
+
         item = next(filter(lambda item: item['name']==name, items), None) # returns the first item found
         return {"item": item}, 200 if item else 404
 
@@ -26,7 +27,13 @@ class Item(Resource):
     def post(self, name):
         if next(filter(lambda item: item['name']==name, items), None):
             return {"message": f"An item with name {name} already exists"}, 400
-        data = request.get_json()
+        parser = reqparse.RequestParser()
+        parser.add_argument("price",
+            type=float,
+            required=True,
+            help = "This field cannot be left blank"
+        )
+        data = parser.parse_args()
         item = {"name": name, "price": data['price']}
         items.append(item)
         return item, 201 # to ensure a client that the item has been created (that's what 201 mean)
@@ -39,7 +46,14 @@ class Item(Resource):
 
     # @jwt_required()
     def put(self, name):
-        data = request.get_json()
+        parser = reqparse.RequestParser()
+        parser.add_argument("price",
+            type=float,
+            required=True,
+            help = "This field cannot be left blank"
+        )
+        data = parser.parse_args()
+
         item =  next(filter(lambda item: item['name']==name, items), None)
         if item is None:
             item = {"name": name, "price": data['price']}
